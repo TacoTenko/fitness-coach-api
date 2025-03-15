@@ -1,68 +1,66 @@
+# api/views_tools.py
+
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 
+from .models import UserProfile
+from .services import (
+    suggest_supplements,
+    validate_workout_plan,
+    generate_fitness_report,
+    alert_missing_workouts
+)
+
 class SuggestSupplements(APIView):
     def get(self, request):
         """
-        Could accept query params like ?diet=vegan or ?goal=gain_muscle
+        GET /api/suggest/supplements/?diet=vegan&goal=gain_muscle
         """
         diet = request.GET.get('diet', 'omnivore')
         goal = request.GET.get('goal', 'general')
-        # Hardcode or have a DB for supplement suggestions
-        suggestions = []
-        if goal == 'gain_muscle':
-            suggestions.append("Whey Protein")
-        if diet == 'vegan':
-            suggestions.append("Vitamin B12")
-
-        if not suggestions:
-            suggestions.append("A general multivitamin")
-
+        suggestions = suggest_supplements(diet, goal)
         return Response({"supplements": suggestions})
 
 class ValidateWorkoutPlan(APIView):
     def post(self, request):
         """
-        Expects JSON with a list of workouts or muscle groups:
+        POST /api/validate/workout-plan/
         {
             "workouts": ["Push-ups", "Squats", "Plank"]
         }
         """
         workouts = request.data.get('workouts', [])
-        # Simplified check: do we have both upper and lower body workouts?
-        upper_body = any("push" in w.lower() or "pull" in w.lower() for w in workouts)
-        lower_body = any("squat" in w.lower() or "lunge" in w.lower() for w in workouts)
-        if upper_body and lower_body:
-            return Response({"balanced": True, "message": "Your workout plan is balanced."})
+        balanced = validate_workout_plan(workouts)
+        if balanced:
+            return Response({"balanced": True, "message": "Workout plan is balanced."})
         return Response({"balanced": False, "message": "Consider adding more variety."})
 
 class GenerateFitnessReport(APIView):
     def get(self, request, user_id):
-        # Summarize user’s progress, recommended workouts, meal plans, etc.
+        """
+        GET /api/generate/fitness-report/<user_id>/
+        """
         try:
             user = UserProfile.objects.get(id=user_id)
         except UserProfile.DoesNotExist:
-            return Response({"detail": "User not found."}, status=status.HTTP_404_NOT_FOUND)
+            return Response({"detail": "User not found."}, status=404)
 
-        logs = ProgressLog.objects.filter(user=user).order_by('-date')
-        # Example summary
-        total_workouts = sum(log.workouts_completed for log in logs)
-        last_weight = logs[0].weight_kg if logs else user.weight_kg
-
-        return Response({
-            "username": user.username,
-            "total_workouts_completed": total_workouts,
-            "current_weight": last_weight,
-            "message": "Keep up the good work!"
-        })
+        report = generate_fitness_report(user)
+        return Response(report)
 
 class AlertMissingWorkouts(APIView):
     def get(self, request, user_id):
-        # Check if user has no logs for the past X days
-        from datetime import date, timedelta
-        cutoff = date.today() - timedelta(days=3)
-        logs = ProgressLog.objects.filter(user__id=user_id, date__gte=cutoff)
-        if not logs.exists():
-            return Response({"alert": True, "message": "You’ve missed workouts recently!"})
-        return Response({"alert": False, "message": "No missing workouts."})
+        """
+        GET /api/alert/missing-workouts/<user_id>/
+        """
+        try:
+            user = UserProfile.objects.get(id=user_id)
+        except UserProfile.DoesNotExist:
+            return Response({"detail": "User not found."}, status=404)
+
+        missing = alert_missing_workouts(user)
+        return Response({
+            "alert": missing,
+            "message": "You’ve missed workouts recently!" if missing else "No missing workouts."
+        })

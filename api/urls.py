@@ -1,4 +1,5 @@
 from django.urls import path
+
 from .views_workout import (
     RecommendWorkout, CalculateCaloriesBurned, TrackExerciseProgress,
     SuggestRestDays, GetStretchingRoutine
