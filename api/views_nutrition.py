@@ -3,6 +3,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 
+from rest_framework.permissions import IsAuthenticated
 from .models import UserProfile, MealPlan
 from .serializers import MealPlanSerializer
 from .services import (
@@ -14,6 +15,7 @@ from .services import (
 )
 
 class RecommendDailyCalories(APIView):
+    permission_classes = [IsAuthenticated]
     def post(self, request):
         """
         Expects JSON:

@@ -3,7 +3,7 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-
+from rest_framework.permissions import IsAuthenticated
 from .models import UserProfile
 from .services import (
     suggest_supplements,
@@ -37,6 +37,8 @@ class ValidateWorkoutPlan(APIView):
         return Response({"balanced": False, "message": "Consider adding more variety."})
 
 class GenerateFitnessReport(APIView):
+    permission_classes = [IsAuthenticated]
+
     def get(self, request, user_id):
         """
         GET /api/generate/fitness-report/<user_id>/
@@ -50,6 +52,8 @@ class GenerateFitnessReport(APIView):
         return Response(report)
 
 class AlertMissingWorkouts(APIView):
+    permission_classes = [IsAuthenticated]
+
     def get(self, request, user_id):
         """
         GET /api/alert/missing-workouts/<user_id>/

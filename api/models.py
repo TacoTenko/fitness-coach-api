@@ -1,5 +1,11 @@
 from django.db import models
 
+FITNESS_LEVELS = (
+    ('beginner', 'Beginner'),
+    ('intermediate', 'Intermediate'),
+    ('advanced', 'Advanced'),
+)
+
 class UserProfile(models.Model):
     username = models.CharField(max_length=50, unique=True)
     age = models.PositiveIntegerField(null=True, blank=True)
@@ -15,9 +21,15 @@ class Workout(models.Model):
     description = models.TextField()
     duration_minutes = models.PositiveIntegerField()
     calories_burned_estimate = models.FloatField()
+    fitness_level = models.CharField(
+        max_length=20,
+        choices=FITNESS_LEVELS,
+        default='beginner'
+    )
 
     def __str__(self):
-        return self.name
+        return f"{self.name} ({self.fitness_level})"
+
 
 class ProgressLog(models.Model):
     user = models.ForeignKey(UserProfile, on_delete=models.CASCADE)

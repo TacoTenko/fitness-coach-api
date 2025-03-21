@@ -4,6 +4,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 
+from rest_framework.permissions import IsAuthenticated
 from .models import UserProfile, ProgressLog, Workout
 from .serializers import ProgressLogSerializer, WorkoutSerializer
 from .services import (
@@ -48,6 +49,8 @@ class CalculateWeightLossGain(APIView):
         return Response({"weekly_weight_change": weekly_change})
 
 class TrackWeightProgress(APIView):
+    permission_classes = [IsAuthenticated]
+
     def post(self, request):
         """
         POST /api/track/weight-progress/
@@ -89,6 +92,7 @@ class CompareWorkouts(APIView):
         return Response(comparison)
 
 class CheckProgressTrends(APIView):
+    permission_classes = [IsAuthenticated]
     def get(self, request, user_id):
         trend = check_progress_trends(user_id)
         return Response({"trend": trend})

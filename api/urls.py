@@ -1,7 +1,7 @@
 from django.urls import path
 
 from .views_workout import (
-    RecommendWorkout, CalculateCaloriesBurned, TrackExerciseProgress,
+    WorkoutDetailView,WorkoutListByLevelView,RecommendWorkout,WorkoutListCreateView, CalculateCaloriesBurned, TrackExerciseProgress,
     SuggestRestDays, GetStretchingRoutine
 )
 from .views_nutrition import (
@@ -20,8 +20,8 @@ urlpatterns = [
     # Workout Tracking & Recommendations
     path('recommend/workout/', RecommendWorkout.as_view(), name='recommend-workout'),
     path('calculate/calories-burned/', CalculateCaloriesBurned.as_view(), name='calculate-calories-burned'),
-    path('track/exercise-progress/<int:user_id>/', TrackExerciseProgress.as_view(), name='track-exercise-progress'),
-    path('suggest/rest-days/<int:user_id>/', SuggestRestDays.as_view(), name='suggest-rest-days'),
+    path('track/exercise-progress/', TrackExerciseProgress.as_view(), name='track-exercise-progress'),
+    path('suggest/rest-days/', SuggestRestDays.as_view(), name='suggest-rest-days'),
     path('get/stretching-routine/', GetStretchingRoutine.as_view(), name='get-stretching-routine'),
 
     # Basic Nutrition & Meal Planning
@@ -36,12 +36,19 @@ urlpatterns = [
     path('calculate/weight-loss-gain/', CalculateWeightLossGain.as_view(), name='calculate-weight-loss-gain'),
     path('track/weight-progress/', TrackWeightProgress.as_view(), name='track-weight-progress'),
     path('compare/workouts/', CompareWorkouts.as_view(), name='compare-workouts'),
-    path('check/progress-trends/<int:user_id>/', CheckProgressTrends.as_view(), name='check-progress-trends'),
+    path('check/progress-trends/', CheckProgressTrends.as_view(), name='check-progress-trends'),
     path('convert/measurement-units/', ConvertMeasurementUnits.as_view(), name='convert-measurement-units'),
 
     # Additional Fitness Tools
     path('suggest/supplements/', SuggestSupplements.as_view(), name='suggest-supplements'),
     path('validate/workout-plan/', ValidateWorkoutPlan.as_view(), name='validate-workout-plan'),
-    path('generate/fitness-report/<int:user_id>/', GenerateFitnessReport.as_view(), name='generate-fitness-report'),
-    path('alert/missing-workouts/<int:user_id>/', AlertMissingWorkouts.as_view(), name='alert-missing-workouts'),
+    path('generate/fitness-report/', GenerateFitnessReport.as_view(), name='generate-fitness-report'),
+    path('alert/missing-workouts/', AlertMissingWorkouts.as_view(), name='alert-missing-workouts'),
+    # New Create Endpoint for Workouts:
+    path('workouts/', WorkoutListCreateView.as_view(), name='workout-list-create'),
+    path('workouts-by-level/', WorkoutListByLevelView.as_view(), name='workout-list-by-level'),
+
+path('workouts/<int:pk>/', WorkoutDetailView.as_view(), name='workout-detail'),
+
+
 ]
